@@ -2,7 +2,6 @@ package com.soside.backend.services.person;
 import com.soside.backend.exceptions.PersonNotFoundException;
 import com.soside.backend.models.Person;
 import com.soside.backend.repositories.PersonRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -10,10 +9,8 @@ import java.util.List;
 @Service
 public class PersonService implements IPersonService {
 
-
     @Autowired
     private PersonRepository personRepository;
-
 
     @Override
     public Person addPerson(Person person) {
@@ -114,5 +111,4 @@ public class PersonService implements IPersonService {
     public List<Person> getPersonsByBloodType(String bloodType) {
         return this.personRepository.findByBloodType(bloodType);
     }
-
 }

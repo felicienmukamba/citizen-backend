@@ -21,6 +21,8 @@ public class Person {
     private String maidenName;
     private LocalDate birthDate;
     private String birthPlace;
+
+    @JoinColumn(nullable = false, unique = true)
     private String nationalityID;
 
     @Enumerated(EnumType.STRING)
@@ -28,6 +30,7 @@ public class Person {
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
 
     @Enumerated(EnumType.STRING)
     private EthnicGroup ethnicGroup;
@@ -47,7 +50,7 @@ public class Person {
     private BloodType bloodType;
 
     @Enumerated(EnumType.STRING)
-    private PersonAllergies allergies;
+    private List<PersonAllergies> allergies;
 
     private String disabilities;
     private String educationLevel;
@@ -67,8 +70,23 @@ public class Person {
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BirthRecord birthRecord;
 
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<MarriageRecord> marriageRecord;
+    @OneToMany(mappedBy = "partner1", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MarriageRecord> marriagesAsPartner1;
+
+    @OneToMany(mappedBy = "partner2", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MarriageRecord> marriagesAsPartner2;
+
+    @OneToMany(mappedBy = "witness1", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MarriageRecord> marriagesAsWitness1;
+
+    @OneToMany(mappedBy = "witness2", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MarriageRecord> marriagesAsWitness2;
+
+    @OneToMany(mappedBy = "witness3", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MarriageRecord> marriagesAsWitness3;
+
+    @OneToMany(mappedBy = "officiant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MarriageRecord> marriagesAsOfficiant;
 
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private DeathRecord deathRecord;
@@ -88,6 +106,14 @@ public class Person {
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BiometricData> biometricData;
 
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getLastName() {
         return lastName;
@@ -257,11 +283,11 @@ public class Person {
         this.bloodType = bloodType;
     }
 
-    public PersonAllergies getAllergies() {
+    public List<PersonAllergies> getAllergies() {
         return allergies;
     }
 
-    public void setAllergies(PersonAllergies allergies) {
+    public void setAllergies(List<PersonAllergies> allergies) {
         this.allergies = allergies;
     }
 
@@ -361,12 +387,52 @@ public class Person {
         this.birthRecord = birthRecord;
     }
 
-    public List<MarriageRecord> getMarriageRecord() {
-        return marriageRecord;
+    public List<MarriageRecord> getMarriagesAsPartner1() {
+        return marriagesAsPartner1;
     }
 
-    public void setMarriageRecord(List<MarriageRecord> marriageRecord) {
-        this.marriageRecord = marriageRecord;
+    public void setMarriagesAsPartner1(List<MarriageRecord> marriagesAsPartner1) {
+        this.marriagesAsPartner1 = marriagesAsPartner1;
+    }
+
+    public List<MarriageRecord> getMarriagesAsPartner2() {
+        return marriagesAsPartner2;
+    }
+
+    public void setMarriagesAsPartner2(List<MarriageRecord> marriagesAsPartner2) {
+        this.marriagesAsPartner2 = marriagesAsPartner2;
+    }
+
+    public List<MarriageRecord> getMarriagesAsWitness1() {
+        return marriagesAsWitness1;
+    }
+
+    public void setMarriagesAsWitness1(List<MarriageRecord> marriagesAsWitness1) {
+        this.marriagesAsWitness1 = marriagesAsWitness1;
+    }
+
+    public List<MarriageRecord> getMarriagesAsWitness2() {
+        return marriagesAsWitness2;
+    }
+
+    public void setMarriagesAsWitness2(List<MarriageRecord> marriagesAsWitness2) {
+        this.marriagesAsWitness2 = marriagesAsWitness2;
+    }
+
+    public List<MarriageRecord> getMarriagesAsWitness3() {
+        return marriagesAsWitness3;
+    }
+
+    public void setMarriagesAsWitness3(List<MarriageRecord> marriagesAsWitness3) {
+        this.marriagesAsWitness3 = marriagesAsWitness3;
+    }
+
+    public List<MarriageRecord> getMarriagesAsOfficiant() {
+        return marriagesAsOfficiant;
+    }
+
+    public void setMarriagesAsOfficiant(List<MarriageRecord> marriagesAsOfficiant) {
+        this.marriagesAsOfficiant = marriagesAsOfficiant;
     }
 
     public DeathRecord getDeathRecord() {
@@ -416,7 +482,4 @@ public class Person {
     public void setBiometricData(List<BiometricData> biometricData) {
         this.biometricData = biometricData;
     }
-
-
-
 }
