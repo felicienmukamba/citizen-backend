@@ -4,12 +4,11 @@ import com.soside.backend.services.biometricData.BiometricDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
-         import java.util.List;
-
- @RestController
- @RequestMapping("biometric-data")
- public class BiometricDataController {
+@RestController
+@RequestMapping("biometric-data")
+public class BiometricDataController {
 
      @Autowired
      private BiometricDataService biometricDataService;
@@ -48,4 +47,4 @@ import org.springframework.web.bind.annotation.*;
          biometricDataService.deleteBiometricData(id);
          return ResponseEntity.noContent().build();
      }
- }
+}

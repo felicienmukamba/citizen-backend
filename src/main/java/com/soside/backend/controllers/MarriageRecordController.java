@@ -1,10 +1,8 @@
 package com.soside.backend.controllers;
-
 import com.soside.backend.models.MarriageRecord;
 import com.soside.backend.services.marriageRecord.MarriageRecordService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

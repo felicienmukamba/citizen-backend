@@ -53,4 +53,168 @@ public class CriminalRecord {
     private String authorizedBy;
     private LocalDateTime consultationDate;
     private String consultationReason;
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    public LocalDate getConvictionDate() {
+        return convictionDate;
+    }
+
+    public void setConvictionDate(LocalDate convictionDate) {
+        this.convictionDate = convictionDate;
+    }
+
+    public String getOffenseDescription() {
+        return offenseDescription;
+    }
+
+    public void setOffenseDescription(String offenseDescription) {
+        this.offenseDescription = offenseDescription;
+    }
+
+    public String getCourtName() {
+        return courtName;
+    }
+
+    public void setCourtName(String courtName) {
+        this.courtName = courtName;
+    }
+
+    public String getJudgeName() {
+        return judgeName;
+    }
+
+    public void setJudgeName(String judgeName) {
+        this.judgeName = judgeName;
+    }
+
+    public String getSentence() {
+        return sentence;
+    }
+
+    public void setSentence(String sentence) {
+        this.sentence = sentence;
+    }
+
+    public SentenceType getSentenceType() {
+        return sentenceType;
+    }
+
+    public void setSentenceType(SentenceType sentenceType) {
+        this.sentenceType = sentenceType;
+    }
+
+    public String getSentenceDuration() {
+        return sentenceDuration;
+    }
+
+    public void setSentenceDuration(String sentenceDuration) {
+        this.sentenceDuration = sentenceDuration;
+    }
+
+    public LocalDate getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(LocalDate releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public ParoleStatus getParoleStatus() {
+        return paroleStatus;
+    }
+
+    public void setParoleStatus(ParoleStatus paroleStatus) {
+        this.paroleStatus = paroleStatus;
+    }
+
+    public RehabilitationStatus getRehabilitationStatus() {
+        return rehabilitationStatus;
+    }
+
+    public void setRehabilitationStatus(RehabilitationStatus rehabilitationStatus) {
+        this.rehabilitationStatus = rehabilitationStatus;
+    }
+
+    public String getCaseNumber() {
+        return caseNumber;
+    }
+
+    public void setCaseNumber(String caseNumber) {
+        this.caseNumber = caseNumber;
+    }
+
+    public String getProsecutorName() {
+        return prosecutorName;
+    }
+
+    public void setProsecutorName(String prosecutorName) {
+        this.prosecutorName = prosecutorName;
+    }
+
+    public String getDefenseAttorneyName() {
+        return defenseAttorneyName;
+    }
+
+    public void setDefenseAttorneyName(String defenseAttorneyName) {
+        this.defenseAttorneyName = defenseAttorneyName;
+    }
+
+    public AppealStatus getAppealStatus() {
+        return appealStatus;
+    }
+
+    public void setAppealStatus(AppealStatus appealStatus) {
+        this.appealStatus = appealStatus;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getAuthorizedBy() {
+        return authorizedBy;
+    }
+
+    public void setAuthorizedBy(String authorizedBy) {
+        this.authorizedBy = authorizedBy;
+    }
+
+    public LocalDateTime getConsultationDate() {
+        return consultationDate;
+    }
+
+    public void setConsultationDate(LocalDateTime consultationDate) {
+        this.consultationDate = consultationDate;
+    }
+
+    public String getConsultationReason() {
+        return consultationReason;
+    }
+
+    public void setConsultationReason(String consultationReason) {
+        this.consultationReason = consultationReason;
+    }
 }
+
+
+
