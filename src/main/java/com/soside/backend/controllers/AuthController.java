@@ -10,6 +10,7 @@ import com.soside.backend.payload.ResetPasswordRequest;
 import com.soside.backend.services.user.UserService;
 import com.soside.backend.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,12 +18,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 
+@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*")
 @RestController
 public class AuthController {
 
@@ -38,8 +41,8 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+    @PostMapping(value = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AuthenticationResponse> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
@@ -56,10 +59,19 @@ public class AuthController {
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegistrationRequest registrationRequest) {
-        if (userService.loadUserByUsername(registrationRequest.getUsername()) != null) {
-            return new ResponseEntity<>("Username already exists", HttpStatus.BAD_REQUEST);
+    @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody RegistrationRequest registrationRequest) {
+        System.out.println("Tentative d'enregistrement de l'utilisateur : " + registrationRequest.getUsername());
+        try {
+            if (userService.loadUserByUsername(registrationRequest.getUsername()) != null) {
+                System.out.println("Nom d'utilisateur déjà existant : " + registrationRequest.getUsername());
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        } catch (UsernameNotFoundException e) {
+            // Expected exception when user is not found, continue with registration
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la vérification de l'utilisateur : " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         User newUser = User.builder()
@@ -69,16 +81,27 @@ public class AuthController {
                 .roles(Collections.singletonList(Role.CITIZEN))
                 .build();
 
-        userService.saveUser(newUser);
+        try {
+            System.out.println("Appel de userService.saveUser pour : " + newUser.getUsername());
+            userService.saveUser(newUser);
+            System.out.println("Utilisateur enregistré avec succès : " + newUser.getUsername());
 
-        final UserDetails userDetails = userService.loadUserByUsername(newUser.getUsername());
-        final String jwt = jwtUtil.generateToken(userDetails);
+            final UserDetails userDetails = userService.loadUserByUsername(newUser.getUsername());
+            System.out.println("Détails de l'utilisateur chargés après l'enregistrement : " + userDetails.getUsername());
+            final String jwt = jwtUtil.generateToken(userDetails);
+            System.out.println("Token JWT généré pour : " + userDetails.getUsername());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthenticationResponse(jwt));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new AuthenticationResponse(jwt));
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'enregistrement de l'utilisateur : " + e.getMessage());
+            e.printStackTrace(); // Imprimez la trace de la pile pour plus de détails
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+    @PostMapping(value = "/forgot-password", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         try {
             userService.forgotPassword(forgotPasswordRequest.getUsername());
             return ResponseEntity.ok("Password reset link sent to your email address.");
@@ -87,8 +110,8 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+    @PostMapping(value = "/reset-password", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         try {
             String message = userService.resetPassword(resetPasswordRequest.getToken(), resetPasswordRequest.getNewPassword());
             return ResponseEntity.ok(message);

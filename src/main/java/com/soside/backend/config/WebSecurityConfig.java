@@ -5,6 +5,7 @@ import com.soside.backend.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -26,7 +27,7 @@ public class WebSecurityConfig {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
-    public WebSecurityConfig(UserService userDetailsService) {
+    public WebSecurityConfig(@Lazy UserService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -44,16 +45,19 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/authenticate").permitAll()
+                        // Autorisation explicite pour /register en premier
                         .requestMatchers("/register").permitAll()
+                        .requestMatchers("/register/").permitAll() // Pour gérer aussi la version avec un slash à la fin
+                        .requestMatchers("/authenticate").permitAll()
                         .requestMatchers("/forgot-password").permitAll()
                         .requestMatchers("/reset-password").permitAll()
-                        // Example role-based authorization based on your endpoints
+                        // Les autres règles d'autorisation
                         .requestMatchers("/api/health-records/**", "/api/care-histories/**").hasAuthority("MEDECIN")
                         .requestMatchers("/api/criminal-records/**", "/api/complaints/**", "/biometric-data/**").hasAuthority("POLICE")
                         .requestMatchers("/api/criminal-records/**", "/api/complaints/**", "/marriage-records/**", "/api/birth-records/**").hasAuthority("JUSTICE")
                         .requestMatchers("/admin/users/**").hasAuthority("ADMIN")
                         .requestMatchers("/persons/**").hasAnyAuthority("MEDECIN", "POLICE", "JUSTICE", "ADMIN") // Adjust as needed
+                        // Toute autre requête doit être authentifiée
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

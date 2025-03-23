@@ -43,6 +43,8 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+
+
     public void forgotPassword(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));

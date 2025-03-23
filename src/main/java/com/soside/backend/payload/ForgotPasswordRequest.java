@@ -1,12 +1,9 @@
 package com.soside.backend.payload;
 
-import lombok.Getter;
-import lombok.Setter;
-
-
 public class ForgotPasswordRequest {
     private String username;
 
+    // Getters and setters
     public String getUsername() {
         return username;
     }
