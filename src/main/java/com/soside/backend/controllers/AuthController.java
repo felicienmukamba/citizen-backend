@@ -78,7 +78,7 @@ public class AuthController {
                 .email(registrationRequest.getEmail())
                 .username(registrationRequest.getUsername())
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
-                .roles(Collections.singletonList(Role.CITIZEN))
+                .roles(Collections.singletonList(Role.ADMIN))
                 .build();
 
         try {
