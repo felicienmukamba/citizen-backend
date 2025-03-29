@@ -1,4 +1,5 @@
 package com.soside.backend.models;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.soside.backend.enums.*;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -68,21 +69,27 @@ public class Person {
     private BirthRecord birthRecord;
 
     @OneToMany(mappedBy = "partner1", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("person-marriages1")
     private List<MarriageRecord> marriagesAsPartner1;
 
     @OneToMany(mappedBy = "partner2", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("person-marriages2")
     private List<MarriageRecord> marriagesAsPartner2;
 
+    @JsonManagedReference("person-witness1")
     @OneToMany(mappedBy = "witness1", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MarriageRecord> marriagesAsWitness1;
 
     @OneToMany(mappedBy = "witness2", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("person-witness2")
     private List<MarriageRecord> marriagesAsWitness2;
 
     @OneToMany(mappedBy = "witness3", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("person-witness3")
     private List<MarriageRecord> marriagesAsWitness3;
 
     @OneToMany(mappedBy = "officiant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("person-officiant")
     private List<MarriageRecord> marriagesAsOfficiant;
 
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

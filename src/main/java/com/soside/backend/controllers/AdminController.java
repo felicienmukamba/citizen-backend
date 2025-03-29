@@ -6,6 +6,7 @@ import com.soside.backend.payload.RegistrationRequest;
 import com.soside.backend.payload.UserUpdateRequest;
 import com.soside.backend.services.user.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,12 @@ public class AdminController {
 
     public AdminController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<User>> getAllUser() {
+        List<User> users = this.userService.gerAllUser();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PostMapping("/add")
@@ -86,9 +93,12 @@ public class AdminController {
 
     @PutMapping("/change-role/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> changeRole(@PathVariable Long id, @RequestParam String role) {
+    public ResponseEntity<Void> changeRole(@PathVariable Long id, @RequestParam(required = false) List<Role> roles) {
+
+        System.out.println(roles);
+
         try {
-            userService.changeRole(id, role);
+            userService.changeRole(id, roles);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (UsernameNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

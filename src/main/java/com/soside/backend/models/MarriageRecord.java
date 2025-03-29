@@ -1,4 +1,5 @@
 package com.soside.backend.models;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.soside.backend.enums.ContractType;
 import com.soside.backend.enums.MarriageType;
 import jakarta.persistence.*;
@@ -22,11 +23,13 @@ public class MarriageRecord {
     // Partner 1
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "partner1_id", nullable = false)
+    @JsonBackReference("person-marriages1")
     private Person partner1;
 
     // Partner 2
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "partner2_id", nullable = false)
+    @JsonBackReference("person-marriages2")
     private Person partner2;
 
     // Place of marriage
@@ -40,21 +43,24 @@ public class MarriageRecord {
     // Officiant of the marriage
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "officiant", nullable = false)
+    @JsonBackReference("person-officiant")
     private Person officiant;
 
     // Witness 1
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "witness1_id", nullable = false)
+    @JsonBackReference("person-witness1")
     private Person witness1;
 
     // Witness 2
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "witness2_id", nullable = false)
+    @JsonBackReference("person-witness2")
     private Person witness2;
 
     // Witness 3 (optional)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "witness3_id")
+    @JsonBackReference("person-witness2")
     private Person witness3;
 
     // Type of marriage (enum)

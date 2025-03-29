@@ -35,6 +35,10 @@ public class UserService implements UserDetailsService {
     @Value("${password.reset.token.expiry.minutes:30}")
     private int passwordResetTokenExpiryMinutes;
 
+    public List<User> gerAllUser() {
+        return this.userRepository.findAll();
+    }
+
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordResetTokenRepository passwordResetTokenRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -106,7 +110,7 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(userId);
     }
 
-    public void changeRole(Long userId, String newRole) {
+    public void changeRole(Long userId, List<Role> newRole) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) authentication.getPrincipal();
 
@@ -118,8 +122,8 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
 
         try {
-            Role role = Role.valueOf(newRole.toUpperCase());
-            user.setRoles(Collections.singletonList(role));
+//            Role role = Role.valueOf(newRole.toUpperCase());
+            user.setRoles(newRole);
             userRepository.save(user);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid role: " + newRole);

@@ -3,6 +3,7 @@ import com.soside.backend.models.Person;
 import com.soside.backend.services.person.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -58,7 +59,7 @@ public class PersonController {
         return new ResponseEntity<>(person, HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Person>> getAllPersons() {
         List<Person> persons = this.personService.getAllPersons();
         return new ResponseEntity<>(persons, HttpStatus.OK);
