@@ -9,7 +9,7 @@ public interface IBiometricDataService {
     BiometricData addBiometricData(BiometricData biometricData);
     BiometricData getBiometricDataById(Long id);
 
-    BiometricData getBiometricDataByPersonNationalityID(String nationalityID);
+//    BiometricData getBiometricDataByPersonNationalityID(String nationalityID);
 
     List<BiometricData> getAllBiometricData();
 

@@ -26,14 +26,14 @@ public class BiometricDataService implements IBiometricDataService {
         return biometricData.orElseThrow(() -> new RuntimeException("BiometricData not found for id: " + id));
     }
 
-    /**
-     * @param nationalityID
-     * @return
-     */
-    @Override
-    public BiometricData getBiometricDataByPersonNationalityID(String nationalityID) {
-        return biometricDataRepository.findByPersonNationalityID(nationalityID);
-    }
+//    /**
+//     * @param nationalityID
+//     * @return
+//     */
+////    @Override
+////    public BiometricData getBiometricDataByPersonNationalityID(String nationalityID) {
+////        return biometricDataRepository.findByPersonNationalityID(nationalityID);
+////    }
 
 
     @Override

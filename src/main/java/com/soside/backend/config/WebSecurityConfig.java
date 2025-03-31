@@ -59,7 +59,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/forgot-password").permitAll()
                         .requestMatchers("/reset-password").permitAll()
                         // Les autres règles d'autorisation
-//                        .requestMatchers("/admin/users/**").permitAll()
+                        .requestMatchers("/api/biometric/recognize-face/**").permitAll()
                         .requestMatchers("/admin/users/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/health-records/**", "/api/care-histories/**").hasAuthority("MEDECIN")
                         .requestMatchers("/api/criminal-records/**", "/api/complaints/**", "/biometric-data/**").hasAnyAuthority("POLICE", "ADMIN")
