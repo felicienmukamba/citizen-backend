@@ -1,9 +1,9 @@
 package com.soside.backend.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
-
 
 @Entity
 @Table(name = "biometric_data")
@@ -13,34 +13,62 @@ public class BiometricData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Reconnaissance faciale (trois images minimum)
+    // Images de reconnaissance faciale (minimum 3)
     @ElementCollection
-    @CollectionTable(name = "facial_recognition_images", joinColumns = @JoinColumn(name = "biometric_data_id"))
+    @CollectionTable(
+            name = "facial_recognition_images",
+            joinColumns = @JoinColumn(name = "biometric_data_id")
+    )
     @Column(name = "image_path")
+    @Lob
     private List<String> facialRecognitionImages;
 
-    // Empreintes digitales (10 doigts)
+    // Empreintes digitales (jusqu’à 10 doigts)
     @ElementCollection
-    @CollectionTable(name = "fingerprint_data", joinColumns = @JoinColumn(name = "biometric_data_id"))
+    @CollectionTable(
+            name = "fingerprint_data",
+            joinColumns = @JoinColumn(name = "biometric_data_id")
+    )
     @Column(name = "fingerprint")
+    @Lob
     private List<String> fingerprints;
 
-    // Scans des yeux
+    // Scans de l’iris
+    @Lob
     private String leftEyeScan;
+
+    @Lob
     private String rightEyeScan;
 
+    // Référence à la personne concernée
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id", nullable = false)
+    @NotNull
     private Person person;
 
+    // Utilisateur qui a saisi les données
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull
     private User user;
 
-    // Getters and setters (Lombok @Data handles this)
+    // --- Constructors ---
 
-    
+    public BiometricData() {
+    }
 
+    public BiometricData(Long id, List<String> facialRecognitionImages, List<String> fingerprints,
+                         String leftEyeScan, String rightEyeScan, Person person, User user) {
+        this.id = id;
+        this.facialRecognitionImages = facialRecognitionImages;
+        this.fingerprints = fingerprints;
+        this.leftEyeScan = leftEyeScan;
+        this.rightEyeScan = rightEyeScan;
+        this.person = person;
+        this.user = user;
+    }
+
+    // --- Getters and Setters ---
 
     public Long getId() {
         return id;

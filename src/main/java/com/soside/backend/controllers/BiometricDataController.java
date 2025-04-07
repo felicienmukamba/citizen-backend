@@ -14,13 +14,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*")
@@ -30,75 +27,137 @@ public class BiometricDataController {
     private final BiometricDataRepository biometricDataRepository;
     private final PersonService personService;
     private final RestTemplate restTemplate;
-    private final String pythonApiUrl = "http://localhost:5000"; // URL de l'API Python
 
     @Autowired
     public BiometricDataController(BiometricDataRepository biometricDataRepository, PersonService personService, RestTemplate restTemplate) {
         this.biometricDataRepository = biometricDataRepository;
-        this.restTemplate = restTemplate;
         this.personService = personService;
+        this.restTemplate = restTemplate;
     }
 
-    @PostMapping("/recognize-face/{nationalityID}")
-    public ResponseEntity<Map<String, Boolean>> recognizeFace(@PathVariable String nationalityID, @RequestParam("image") MultipartFile imageFile) {
-        Optional<Person> personOptional = Optional.ofNullable(personService.getPersonByNationalityID(nationalityID));
-        if (personOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", false)); // Personne non trouvée
-        }
-        Person person = personOptional.get();
-        BiometricData biometricData = biometricDataRepository.findByPerson(person);
-
-        if (biometricData == null || biometricData.getFacialRecognitionImages() == null || biometricData.getFacialRecognitionImages().isEmpty()) {
-            return ResponseEntity.ok(Map.of("match", false)); // Pas d'images faciales enregistrées pour cette personne
-        }
-
-        List<String> knownImagePaths = biometricData.getFacialRecognitionImages();
-        List<String> knownEncodingsBase64 = new ArrayList<>();
-
-        // Simuler l'encodage des images connues (dans une application réelle, vous pourriez pré-calculer et stocker les encodages)
-        for (String imagePath : knownImagePaths) {
-            try {
-                Path path = Path.of(imagePath);
-                byte[] imageBytes = Files.readAllBytes(path);
-                // Ici, vous devriez appeler votre script Python pour encoder cette image
-                // Pour cet exemple, nous allons simuler un encodage en base64
-                String encodedString = Base64.getEncoder().encodeToString(imageBytes);
-                knownEncodingsBase64.add(encodedString);
-            } catch (IOException e) {
-                e.printStackTrace();
-                // Gérer l'erreur si une image n'est pas trouvée
-            }
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        org.springframework.util.LinkedMultiValueMap<String, Object> body = new org.springframework.util.LinkedMultiValueMap<>();
+    @PostMapping("/face-recognition")
+    public ResponseEntity<Person> recognizeFace(@RequestParam("image") MultipartFile imageFile) {
         try {
-            body.add("image", new org.springframework.core.io.ByteArrayResource(imageFile.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return imageFile.getOriginalFilename();
-                }
-            });
-            for (String encoding : knownEncodingsBase64) {
-                body.add("known_encodings", encoding);
-            }
-
-            HttpEntity<org.springframework.util.MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<Map> response = restTemplate.postForEntity(pythonApiUrl + "/recognize", requestEntity, Map.class);
-
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return ResponseEntity.ok(Map.of("match", (Boolean) response.getBody().get("match")));
+            byte[] imageData = imageFile.getBytes();
+            String facialRecognitionApiUrl = "http://facial-recognition-api/recognize";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            HttpEntity<byte[]> requestEntity = new HttpEntity<>(imageData, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(facialRecognitionApiUrl, requestEntity, Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().containsKey("personId")) {
+                String personId = String.valueOf(response.getBody().get("personId"));
+                Person person = personService.getPersonByNationalityID(personId);
+                return ResponseEntity.ok(person);
             } else {
-                System.err.println("Erreur lors de l'appel à l'API Python: " + response.getStatusCode());
-                return ResponseEntity.status(response.getStatusCode()).body(Map.of("match", false));
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/iris-recognition")
+    public ResponseEntity<Person> recognizeIris(@RequestParam("irisData") String irisData, @RequestParam("isLeft") boolean isLeft) {
+        try {
+            byte[] irisBytes = irisData.getBytes();
+            String irisRecognitionApiUrl = "http://iris-recognition-api/recognize";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            HttpEntity<byte[]> requestEntity = new HttpEntity<>(irisBytes, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(irisRecognitionApiUrl, requestEntity, Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().containsKey("personId")) {
+                String personId = String.valueOf(response.getBody().get("personId"));
+                Person person = personService.getPersonByNationalityID(personId);
+                return ResponseEntity.ok(person);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/fingerprint-recognition")
+    public ResponseEntity<Person> recognizeFingerprint(@RequestParam("fingerprintData") String fingerprintData) {
+        try {
+            byte[] fingerprintBytes = fingerprintData.getBytes();
+            String fingerprintRecognitionApiUrl = "http://fingerprint-recognition-api/recognize";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            HttpEntity<byte[]> requestEntity = new HttpEntity<>(fingerprintBytes, headers);
+            ResponseEntity<Map> response = restTemplate.postForEntity(fingerprintRecognitionApiUrl, requestEntity, Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().containsKey("personId")) {
+                String personId = String.valueOf(response.getBody().get("personId"));
+                Person person = personService.getPersonByNationalityID(personId);
+                return ResponseEntity.ok(person);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/add-biometric-data/{personId}")
+    public ResponseEntity<BiometricData> addBiometricData(
+            @PathVariable String personId,
+            @RequestParam(value = "facialImages", required = false) MultipartFile[] facialImages,
+            @RequestParam(value = "leftIris", required = false) MultipartFile leftIris,
+            @RequestParam(value = "rightIris", required = false) MultipartFile rightIris,
+            @RequestParam(value = "fingerprints", required = false) MultipartFile[] fingerprints) {
+        try {
+            Person person = personService.getPersonByNationalityID(personId);
+            BiometricData biometricData = new BiometricData();
+            biometricData.setPerson(person);
+
+            if (facialImages != null && facialImages.length > 0) {
+                List<String> facialDataList = new ArrayList<>();
+                for (MultipartFile imageFile : facialImages) {
+                    facialDataList.add(Base64.getEncoder().encodeToString(imageFile.getBytes()));
+                }
+                biometricData.setFacialRecognitionImages(facialDataList);
             }
 
+            if (leftIris != null) {
+                biometricData.setLeftEyeScan(Base64.getEncoder().encodeToString(leftIris.getBytes()));
+            }
+
+            if (rightIris != null) {
+                biometricData.setRightEyeScan(Base64.getEncoder().encodeToString(rightIris.getBytes()));
+            }
+
+            if (fingerprints != null && fingerprints.length > 0) {
+                List<String> fingerprintDataList = new ArrayList<>();
+                for (MultipartFile fingerprintFile : fingerprints) {
+                    fingerprintDataList.add(Base64.getEncoder().encodeToString(fingerprintFile.getBytes()));
+                }
+                biometricData.setFingerprints(fingerprintDataList);
+            }
+
+            BiometricData savedBiometricData = biometricDataRepository.save(biometricData);
+            return ResponseEntity.ok(savedBiometricData);
         } catch (IOException e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", false));
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/person/{nationalityID}")
+    public ResponseEntity<BiometricData> getBiometricByPerson(@PathVariable String nationalityID) {
+        try {
+            Person person = personService.getPersonByNationalityID(nationalityID);
+            BiometricData biometricData = biometricDataRepository.findByPerson(person);
+            if (biometricData != null) {
+                return ResponseEntity.ok(biometricData);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
