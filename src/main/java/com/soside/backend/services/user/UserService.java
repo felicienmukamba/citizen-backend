@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -160,5 +161,10 @@ public class UserService implements UserDetailsService {
 
         passwordResetTokenRepository.delete(resetToken); // Optionally delete the token after use
         return "Password reset successfully";
+    }
+
+    public User getUserByUsername(String username) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        return userOptional.orElse(null); // Return the User if found, otherwise return null
     }
 }

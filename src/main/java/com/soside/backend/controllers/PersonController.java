@@ -1,21 +1,24 @@
 package com.soside.backend.controllers;
+
 import com.soside.backend.models.Person;
 import com.soside.backend.services.person.PersonService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("persons")
 public class PersonController {
 
     @Autowired
     private PersonService personService;
-
 
     @PostMapping
     public ResponseEntity<Person> addPerson(@RequestBody Person person) {
@@ -81,5 +84,29 @@ public class PersonController {
     public ResponseEntity<List<Person>> getPersonsByBloodType(@PathVariable String bloodType) {
         List<Person> persons = personService.getPersonsByBloodType(bloodType);
         return new ResponseEntity<>(persons, HttpStatus.OK);
+    }
+
+    // 🔽 Upload jusqu’à 3 photos passeport
+    @PostMapping(value = "/{nationalityID}/upload-passport", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadPassportPhotos(
+            @PathVariable String nationalityID,
+            @RequestParam("files") MultipartFile[] files) {
+        if (files.length > 3) {
+            return ResponseEntity.badRequest().body("Maximum 3 images autorisées.");
+        }
+        personService.savePassportPhotos(nationalityID, files);
+        return ResponseEntity.ok("Images enregistrées avec succès.");
+    }
+
+    // 🔽 Récupérer une photo spécifique (1, 2 ou 3)
+    @GetMapping("/{nationalityID}/passport-photo/{index}")
+    public ResponseEntity<Resource> getPassportPhoto(
+            @PathVariable String nationalityID,
+            @PathVariable int index,
+            HttpServletResponse response) throws IOException {
+        Resource file = personService.loadPassportPhoto(nationalityID, index);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(file);
     }
 }

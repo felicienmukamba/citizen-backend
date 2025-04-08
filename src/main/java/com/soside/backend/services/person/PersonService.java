@@ -4,7 +4,15 @@ import com.soside.backend.models.Person;
 import com.soside.backend.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
 
 @Service
 public class PersonService implements IPersonService {
@@ -110,5 +118,32 @@ public class PersonService implements IPersonService {
     @Override
     public List<Person> getPersonsByBloodType(String bloodType) {
         return this.personRepository.findByBloodType(bloodType);
+    }
+
+    public void savePassportPhotos(String nationalityID, MultipartFile[] files) {
+        String uploadDir = "uploads/persons/" + nationalityID;
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        for (int i = 0; i < files.length; i++) {
+            MultipartFile file = files[i];
+            Path filePath = Paths.get(uploadDir, "passport" + (i + 1) + ".jpg");
+            try {
+                Files.write(filePath, file.getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException("Échec de l’enregistrement des images.", e);
+            }
+        }
+    }
+
+    public Resource loadPassportPhoto(String nationalityID, int index) {
+        String uploadDir = "uploads/persons/" + nationalityID;
+        Path filePath = Paths.get(uploadDir, "passport" + index + ".jpg");
+        if (!Files.exists(filePath)) {
+            throw new RuntimeException("Image introuvable");
+        }
+        return new FileSystemResource(filePath.toFile());
     }
 }

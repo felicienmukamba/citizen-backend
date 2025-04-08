@@ -1,11 +1,12 @@
 package com.soside.backend.models;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.soside.backend.enums.*;
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-
 
 @Entity
 @Table(name = "person")
@@ -13,6 +14,7 @@ public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String lastName;
     private String firstName;
     private String maidenName;
@@ -30,6 +32,7 @@ public class Person {
 
     @Enumerated(EnumType.STRING)
     private EthnicGroup ethnicGroup;
+
     private String birthCertificateNumber;
     private String placeOfBirth;
     private String fathersName;
@@ -66,6 +69,12 @@ public class Person {
     private String drivingLicenseNumber;
     private String passportNumber;
 
+    // 📸 Images (paths to server-side stored files)
+    private String passportPhoto1Path;
+    private String passportPhoto2Path;
+    private String passportPhoto3Path;
+
+    // 👇 Relations
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BirthRecord birthRecord;
 
@@ -77,8 +86,8 @@ public class Person {
     @JsonManagedReference("person-marriages2")
     private List<MarriageRecord> marriagesAsPartner2;
 
-    @JsonManagedReference("person-witness1")
     @OneToMany(mappedBy = "witness1", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("person-witness1")
     private List<MarriageRecord> marriagesAsWitness1;
 
     @OneToMany(mappedBy = "witness2", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -110,59 +119,6 @@ public class Person {
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BiometricData> biometricData;
-
-    public Person() {
-    }
-
-    public Person(Long id, String lastName, String firstName, String maidenName, LocalDate birthDate, String birthPlace, String nationalityID, Nationality nationality, Gender gender, EthnicGroup ethnicGroup, String birthCertificateNumber, String placeOfBirth, String fathersName, String mothersName, String fathersProfession, String mothersProfession, String currentAddress, String phoneNumber, String emailAddress, String emergencyContactName, String emergencyContactPhone, BloodType bloodType, List<PersonAllergies> allergies, String disabilities, String educationLevel, String profession, MaritalStatus maritalStatus, String occupation, String religion, String voterStatus, String taxIdentificationNumber, String socialSecurityNumber, String drivingLicenseNumber, String passportNumber, BirthRecord birthRecord, List<MarriageRecord> marriagesAsPartner1, List<MarriageRecord> marriagesAsPartner2, List<MarriageRecord> marriagesAsWitness1, List<MarriageRecord> marriagesAsWitness2, List<MarriageRecord> marriagesAsWitness3, List<MarriageRecord> marriagesAsOfficiant, DeathRecord deathRecord, List<HealthRecord> healthRecords, List<CriminalRecord> criminalRecord, List<Complaint> filedComplaints, List<Complaint> receivedComplaints, List<BiometricData> biometricData) {
-        this.id = id;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.maidenName = maidenName;
-        this.birthDate = birthDate;
-        this.birthPlace = birthPlace;
-        this.nationalityID = nationalityID;
-        this.nationality = nationality;
-        this.gender = gender;
-        this.ethnicGroup = ethnicGroup;
-        this.birthCertificateNumber = birthCertificateNumber;
-        this.placeOfBirth = placeOfBirth;
-        this.fathersName = fathersName;
-        this.mothersName = mothersName;
-        this.fathersProfession = fathersProfession;
-        this.mothersProfession = mothersProfession;
-        this.currentAddress = currentAddress;
-        this.phoneNumber = phoneNumber;
-        this.emailAddress = emailAddress;
-        this.emergencyContactName = emergencyContactName;
-        this.emergencyContactPhone = emergencyContactPhone;
-        this.bloodType = bloodType;
-        this.allergies = allergies;
-        this.disabilities = disabilities;
-        this.educationLevel = educationLevel;
-        this.profession = profession;
-        this.maritalStatus = maritalStatus;
-        this.occupation = occupation;
-        this.religion = religion;
-        this.voterStatus = voterStatus;
-        this.taxIdentificationNumber = taxIdentificationNumber;
-        this.socialSecurityNumber = socialSecurityNumber;
-        this.drivingLicenseNumber = drivingLicenseNumber;
-        this.passportNumber = passportNumber;
-        this.birthRecord = birthRecord;
-        this.marriagesAsPartner1 = marriagesAsPartner1;
-        this.marriagesAsPartner2 = marriagesAsPartner2;
-        this.marriagesAsWitness1 = marriagesAsWitness1;
-        this.marriagesAsWitness2 = marriagesAsWitness2;
-        this.marriagesAsWitness3 = marriagesAsWitness3;
-        this.marriagesAsOfficiant = marriagesAsOfficiant;
-        this.deathRecord = deathRecord;
-        this.healthRecords = healthRecords;
-        this.criminalRecord = criminalRecord;
-        this.filedComplaints = filedComplaints;
-        this.receivedComplaints = receivedComplaints;
-        this.biometricData = biometricData;
-    }
 
     public Long getId() {
         return id;
@@ -436,6 +392,30 @@ public class Person {
         this.passportNumber = passportNumber;
     }
 
+    public String getPassportPhoto1Path() {
+        return passportPhoto1Path;
+    }
+
+    public void setPassportPhoto1Path(String passportPhoto1Path) {
+        this.passportPhoto1Path = passportPhoto1Path;
+    }
+
+    public String getPassportPhoto2Path() {
+        return passportPhoto2Path;
+    }
+
+    public void setPassportPhoto2Path(String passportPhoto2Path) {
+        this.passportPhoto2Path = passportPhoto2Path;
+    }
+
+    public String getPassportPhoto3Path() {
+        return passportPhoto3Path;
+    }
+
+    public void setPassportPhoto3Path(String passportPhoto3Path) {
+        this.passportPhoto3Path = passportPhoto3Path;
+    }
+
     public BirthRecord getBirthRecord() {
         return birthRecord;
     }
@@ -538,18 +518,5 @@ public class Person {
 
     public void setBiometricData(List<BiometricData> biometricData) {
         this.biometricData = biometricData;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Person person = (Person) o;
-        return Objects.equals(id, person.id) && Objects.equals(nationalityID, person.nationalityID);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, nationalityID);
     }
 }

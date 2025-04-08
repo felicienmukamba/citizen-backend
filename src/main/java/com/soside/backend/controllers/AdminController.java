@@ -1,5 +1,4 @@
 package com.soside.backend.controllers;
-
 import com.soside.backend.enums.Role;
 import com.soside.backend.models.User;
 import com.soside.backend.payload.RegistrationRequest;
@@ -16,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/admin/users") // Préfixe pour les endpoints d'administration des utilisateurs
 public class AdminController {

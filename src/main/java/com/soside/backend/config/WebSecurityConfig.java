@@ -1,7 +1,9 @@
 package com.soside.backend.config;
+
 import com.soside.backend.filters.JwtRequestFilter;
 import com.soside.backend.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -15,6 +17,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -22,12 +30,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final UserService userDetailsService;
+    private final JwtRequestFilter jwtRequestFilter;
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    @Value("${cors.allowed-origins}")
+    private String[] allowedOrigins;
 
-    public WebSecurityConfig(@Lazy UserService userDetailsService) {
+    public WebSecurityConfig(@Lazy UserService userDetailsService, JwtRequestFilter jwtRequestFilter) {
         this.userDetailsService = userDetailsService;
+        this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Bean
@@ -41,31 +51,37 @@ public class WebSecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(request -> {
-                    org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-                    configuration.setAllowedOrigins(java.util.List.of("http://localhost:4200")); // Add your Angular app's origin
-                    configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
-                    configuration.setAllowCredentials(true); // If you are using cookies with CORS
-                    return configuration;
-                }))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Autorisation explicite pour /register en premier
-                        .requestMatchers("/register").permitAll()
-                        .requestMatchers("/register/").permitAll() // Pour gérer aussi la version avec un slash à la fin
-                        .requestMatchers("/authenticate").permitAll()
-                        .requestMatchers("/forgot-password").permitAll()
-                        .requestMatchers("/reset-password").permitAll()
-                        // Les autres règles d'autorisation
-                        .requestMatchers("/api/biometric/recognize-face/**").permitAll()
+                        // Publicly accessible endpoints
+                        .requestMatchers("/register", "/register/", "/authenticate", "/forgot-password", "/reset-password").permitAll()
+                        .requestMatchers("/api/biometric/recognize-face/**").permitAll() // Consider more specific security
+
+                        // Role-based access control
                         .requestMatchers("/admin/users/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/health-records/**", "/api/care-histories/**").hasAuthority("MEDECIN")
-                        .requestMatchers("/api/criminal-records/**", "/api/complaints/**", "/biometric-data/**").hasAnyAuthority("POLICE", "ADMIN")
-                        .requestMatchers("/api/criminal-records/**", "/api/complaints/**", "/marriage-records/**", "/api/birth-records/**").permitAll()
-                        .requestMatchers("/persons/**").hasAnyAuthority("MEDECIN", "POLICE", "JUSTICE", "ADMIN") // Adjust as needed
-                        // Toute autre requête doit être authentifiée
+                        .requestMatchers("/api/criminal-records/**", "/api/complaints/**").hasAnyAuthority("POLICE", "ADMIN")
+                        .requestMatchers("/biometric-data/**").hasAnyAuthority("POLICE", "ADMIN") // Consider if other roles need access
+
+                        // Specific access rules - review if these should be more restricted
+                        .requestMatchers("/api/criminal-records/**", "/api/complaints/**", "/marriage-records/**", "/api/birth-records/**").permitAll() // Consider role-based access
+                        .requestMatchers("/persons/**").hasAnyAuthority("MEDECIN", "POLICE", "JUSTICE", "ADMIN")
+
+                        // Secure all other endpoints
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
